@@ -1314,7 +1314,8 @@ if [ "X$BUILD_OK" = Xtrue -a "$RUN_TESTS" = "true" ]; then
   fi
   if [ $(echo ${ENABLE_BOT_TESTS} | tr ',' ' ' | tr ' ' '\n' | grep '^GPU$' | wc -l) -gt 0 -a X"${DISABLE_GPU_TESTS}" != X"true" ] ; then
     DO_GPU_TESTS=true
-    mark_commit_status_all_prs 'unittests/gpu' 'pending' -u "${BUILD_URL}" -d "Waiting for tests to start"
+    mark_commit_status_all_prs 'unittests/cuda' 'pending' -u "${BUILD_URL}" -d "Waiting for tests to start"
+    mark_commit_status_all_prs 'unittests/rocm' 'pending' -u "${BUILD_URL}" -d "Waiting for tests to start"
   fi
   if [ $(echo ${ENABLE_BOT_TESTS} | tr ',' ' ' | tr ' ' '\n' | grep '^HLT_P2_TIMING$' | wc -l) -gt 0 ] ; then
     if [ $(echo ${ARCHITECTURE}   | grep "_amd64_" | wc -l) -gt 0 ] ; then
@@ -1456,6 +1457,10 @@ if [ "X$DO_SHORT_MATRIX" = Xtrue ]; then
       ex_type_lc=$(echo ${ex_type} | tr '[A-Z]' '[a-z]')
       grep -v '^MATRIX_ARGS=' $WORKSPACE/run-relvals.prop > $WORKSPACE/run-relvals-${ex_type_lc}.prop
       echo "MATRIX_ARGS=$(get_pr_relval_args $DO_COMPARISON _${ex_type})" >> $WORKSPACE/run-relvals-${ex_type_lc}.prop
+      if [ "${ex_type_lc}" = "gpu"]; then
+        cp $WORKSPACE/run-relvals-${ex_type_lc}.prop $WORKSPACE/run-relvals-cuda.prop
+        mv $WORKSPACE/run-relvals-${ex_type_lc}.prop $WORKSPACE/run-relvals-rocm.prop
+      fi
     done
     if [ $(runTheMatrix.py --help | grep '^ *--maxSteps' | wc -l) -eq 0 ] ; then
       mark_commit_status_all_prs "relvals/input" 'success' -u "${BUILD_URL}" -d "Not ran, runTheMatrix does not support --maxSteps flag" -e
@@ -1487,7 +1492,10 @@ if [ "X$DO_ADDON_TESTS" = Xtrue ]; then
 fi
 
 if [ "X$DO_GPU_TESTS" = Xtrue ]; then
-  cp $WORKSPACE/test-env.txt $WORKSPACE/run-unittests.prop
+  cp $WORKSPACE/test-env.txt $WORKSPACE/run-unittests-cuda.prop
+  echo "GPU_FLAVOR=cuda" >> $WORKSPACE/run-unittests-cuda.prop
+  cp $WORKSPACE/test-env.txt $WORKSPACE/run-unittests-rocm.prop
+  echo "GPU_FLAVOR=rocm" >> $WORKSPACE/run-unittests-rocm.prop
 fi
 
 if ${BUILD_EXTERNAL} ; then

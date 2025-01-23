@@ -1457,7 +1457,7 @@ if [ "X$DO_SHORT_MATRIX" = Xtrue ]; then
       ex_type_lc=$(echo ${ex_type} | tr '[A-Z]' '[a-z]')
       grep -v '^MATRIX_ARGS=' $WORKSPACE/run-relvals.prop > $WORKSPACE/run-relvals-${ex_type_lc}.prop
       echo "MATRIX_ARGS=$(get_pr_relval_args $DO_COMPARISON _${ex_type})" >> $WORKSPACE/run-relvals-${ex_type_lc}.prop
-      if [ "${ex_type_lc}" = "gpu"]; then
+      if [ "${ex_type_lc}" = "gpu" ]; then
         cp $WORKSPACE/run-relvals-${ex_type_lc}.prop $WORKSPACE/run-relvals-cuda.prop
         mv $WORKSPACE/run-relvals-${ex_type_lc}.prop $WORKSPACE/run-relvals-rocm.prop
       fi
